@@ -1,21 +1,35 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/zayarlyn/own-auth/src/router"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
+func initializeDB() *gorm.DB {
+	db, err := gorm.Open(postgres.Open(os.Getenv("DB_URL")), &gorm.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return db
+}
+
 func main() {
-	// Create a Gin router with default middleware (logger and recovery)
-	router := gin.Default()
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	// Define a simple GET endpoint
-	router.GET("/ping", func(c *gin.Context) {
-		// Return JSON response
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	r := gin.Default()
+	db := initializeDB()
 
-	// Start server on port 8080 (default)
-	router.Run()
+	router.Register(r, db)
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
