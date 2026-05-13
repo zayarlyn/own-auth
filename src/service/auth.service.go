@@ -15,5 +15,5 @@ func Login(db *gorm.DB) string {
 		log.Fatal(err)
 	}
 
-	return user.ID
+	return user.ID.String()
 }

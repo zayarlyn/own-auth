@@ -1,0 +1,23 @@
+name: own-auth
+
+volumes:
+  postgres_data:
+
+services:
+  own-auth-postgres-db:
+    container_name: own-auth-postgres-db
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}:own-auth
+      POSTGRES_PASSWORD: ${DB_PWD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PUB_PORT:-}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
